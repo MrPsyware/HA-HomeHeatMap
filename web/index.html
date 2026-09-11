@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Home Heat Map</title><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="stylesheet" href="style.css"></head>
+<body>
+<header><a class="brand" href="./"><span class="brand-icon">⌂</span><span>Home Heat Map<small>A little more understanding of home.</small></span></a><div class="header-actions"><span id="connection" class="badge">Connecting…</span><button id="demo">Try demo</button><button id="setup-toggle">Setup</button></div></header>
+<main>
+ <section class="heading"><div><p class="eyebrow">YOUR HOME, MAPPED</p><h1 id="page-title">A warmer perspective.</h1><p id="subtitle">Place your sensors. See the spaces between them.</p></div><div class="view-switch"><select id="metric" aria-label="Map layer"></select><button id="live-button" class="active">Live</button><button id="history-button">History</button></div></section>
+ <div id="notice" role="status" hidden></div>
+ <div class="workspace">
+  <aside>
+   <div class="aside-title"><span>FLOORS</span><button id="add-floor" title="Add floor" aria-label="Add floor">+</button></div><nav id="floor-list" aria-label="Floors"></nav>
+   <div id="view-panel"><div class="aside-title">ROOM READINGS</div><div id="room-list"></div><p class="hint">Dotted outlines indicate estimates in rooms without a reading. Doorways allow temperatures to influence connected rooms.</p></div>
+   <div id="setup-panel" hidden>
+    <div class="aside-title">FLOOR SETTINGS</div><label>Floor name<input id="floor-name" maxlength="100"></label><label>Home Assistant floor<select id="ha-floor"></select></label>
+    <div class="aside-title">DRAW YOUR HOME</div><div class="tools"><button id="room-tool">▱ Room</button><button id="door-tool">⇄ Doorway</button><button id="select-tool" class="active">↖ Select</button></div>
+    <p id="tool-hint" class="hint">Draw rooms first, then place sensors and connect doorways.</p>
+    <div id="room-controls" hidden><label>Room name<input id="room-name" placeholder="e.g. Living room" maxlength="100"></label><div class="row"><button id="undo-point">Undo point</button><button id="finish-room">Finish room</button></div></div>
+    <div id="door-controls" hidden><label>Doorway influence <input id="door-influence" type="range" min="0" max="1" step="0.05" value="0.35"></label><p class="hint">0 blocks influence; 1 gives the strongest connection. This is a visual estimate, not an airflow simulation.</p></div>
+    <div class="aside-title">SENSORS <button id="refresh-sensors" title="Refresh sensors">↻</button></div><input id="sensor-search" placeholder="Find a sensor…" aria-label="Find a temperature sensor"><label class="check"><input type="checkbox" id="show-ignored"> Show ignored sensors</label><label>Device filter<select id="device-filter"><option value="floor">This HA floor + placed here</option><option value="all">All devices</option><option value="unplaced">All unplaced devices</option></select></label>
+<label id="network-control" hidden>Network<select id="network"><option value="">All networks</option><option value="wifi">Wi-Fi</option><option value="zigbee">Zigbee</option><option value="unknown">Unclassified</option></select></label>
+<button id="pair-humidity">Pair matching humidity sensors</button><p id="pair-summary" class="hint"></p>
+<div id="sensor-list"></div>
+<div id="reference-controls" hidden><div class="aside-title">REFERENCE MARKERS</div><input id="reference-name" maxlength="100" placeholder="e.g. Hall access point"><select id="reference-kind"><option value="wifi">Wi-Fi access point</option><option value="zigbee">Zigbee coordinator / router</option></select><button id="add-reference">Place reference marker</button><div id="reference-list"></div></div>
+    <div class="aside-title">ROOMS & DOORWAYS</div><div id="geometry-list"></div><button id="delete-floor" class="danger">Delete this floor</button>
+   </div>
+   <div class="aside-footer"><button id="save" class="primary" hidden>Save setup</button><span id="save-state"></span></div>
+  </aside>
+  <section class="map-section">
+   <div class="map-toolbar"><select id="embed-floor" aria-label="Floor" hidden></select><div><span class="live-dot"></span><strong id="map-title">Your floor plan</strong><span id="map-mode" class="muted">Live temperatures</span></div><div class="row"><button id="zoom-out" aria-label="Zoom out">−</button><span id="zoom-label">100%</span><button id="zoom-in" aria-label="Zoom in">+</button><button id="zoom-fit">Fit</button></div></div>
+   <div class="map-viewport" id="viewport"><div id="empty"><div class="empty-icon">⌂</div><h2>Every room has a story.</h2><p>Add a floor plan to start mapping your home’s temperatures.</p><button id="empty-add" class="primary">Add your first floor</button><button id="empty-demo">Explore a demo</button></div><canvas id="map" hidden aria-label="Interactive floor plan: use Setup to draw rooms and place sensors" tabindex="0"></canvas></div>
+   <div class="map-footer"><div><strong id="metric-title">Temperature</strong><span id="metric-unit" class="muted"> °C</span></div><div class="legend"><input id="scale-min" type="number" value="15" min="-50" max="80" aria-label="Minimum temperature colour"><span class="colour-bar"></span><input id="scale-max" type="number" value="28" min="-49" max="100" aria-label="Maximum temperature colour"></div><label class="opacity">Overlay<input id="opacity" type="range" min="0" max="0.9" step="0.05" value="0.55"></label></div>
+   <section id="timeline" hidden><div class="timeline-top"><div><p class="eyebrow">TRAVEL THROUGH TIME</p><h2 id="time-label">Temperature history</h2></div><div class="row"><select id="range" aria-label="History range"><option value="1">Day</option><option value="7">Week</option><option value="30">Month</option></select><select id="history-detail" aria-label="History detail"><option value="auto">Auto detail</option><option value="hour">Hourly means</option></select><input id="history-end" type="datetime-local" aria-label="History period end"><button id="load-history">Load</button></div></div><div class="scrubber"><button id="play" aria-label="Play history">▶</button><input id="scrub" type="range" min="0" max="1000" value="1000" aria-label="Scrub temperature history" disabled></div><div class="timeline-meta"><span id="range-start"></span><span id="history-resolution">Load a time range to begin</span><span id="range-end"></span></div><p id="history-warning" class="hint"></p></section>
+  </section>
+ </div>
+</main>
+<dialog id="floor-dialog"><form id="floor-form"><p class="eyebrow">MAKE YOURSELF AT HOME</p><h2>Add a floor plan</h2><label>Floor name<input name="name" required maxlength="100" placeholder="Ground floor"></label><label>Home Assistant floor<select name="ha_floor_id" id="new-ha-floor"></select></label><label>Floor plan image<input name="image" type="file" accept="image/png,image/jpeg,image/gif" required></label><p class="hint">PNG, JPEG or GIF, up to 20 MB. You’ll trace rooms over this image.</p><div class="row"><button type="button" id="cancel-floor">Cancel</button><button class="primary" type="submit">Add floor</button></div></form></dialog>
+<script type="module" src="app.js"></script>
+</body></html>

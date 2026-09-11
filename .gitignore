@@ -1,0 +1,39 @@
+# Local Home Assistant connection details and environment variants
+.env
+.env.*
+!.env.example
+/ha.yaml
+/ha.yml
+
+# Saved home layout, uploaded plans, and original floor-plan images
+/data/
+/images/
+/*.png
+/*.jpg
+/*.jpeg
+/*.gif
+/*.webp
+/*.pdf
+
+# Local keys and certificates
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+
+# Build output, local tooling, and private working files
+/homeheatmap
+/homeheatmap.exe
+node_modules/
+/.agents/
+/.codex/
+*.log
+*.bak
+*.backup
+*.swp
+*~
+.envrc
+/backups/
+/screenshots/

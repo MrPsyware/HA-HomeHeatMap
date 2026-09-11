@@ -1,0 +1,22 @@
+# Only application build inputs enter the Docker context.
+**
+!go.mod
+!go.sum
+!*.go
+!web/
+!web/**
+!Dockerfile
+
+# Exclude private/local files even if placed among web assets.
+**/.env
+**/.env.*
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx
+**/*.crt
+**/*.cer
+**/*.log
+**/*.bak
+**/*.backup
+**/node_modules

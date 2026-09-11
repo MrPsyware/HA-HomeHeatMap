@@ -1,0 +1,11 @@
+services:
+  homeheatmap:
+    build: .
+    ports:
+      - "8099:8099"
+    environment:
+      HA_URL: ${HA_URL}
+      HA_TOKEN: ${HA_TOKEN}
+    volumes:
+      - ./data:/data
+    restart: unless-stopped
