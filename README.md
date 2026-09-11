@@ -61,6 +61,28 @@ Fill `.env`, then run `docker compose up --build -d`. The container stores its d
 
 ## Home Assistant add-on / app
 
+This repository includes app-store metadata in `repository.yaml`. Once the
+repository is publicly readable, add it using [Add repository to Home Assistant](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2FMrPsyware%2FHA-HomeHeatMap),
+or enter `https://github.com/MrPsyware/HA-HomeHeatMap` in the app store's repository
+settings. Select **Home Heat Map**, install, start, and open its web UI.
+This requires an HA installation with Supervisor/app support.
+
+While the GitHub repository is private, the ordinary repository URL cannot be
+cloned anonymously by HA. Your desktop's `gh` login is not transferred to HA.
+For private testing, use the local installation below. Repository visibility is
+a separate GitHub setting; this packaging does not change it.
+
+Installation currently builds the Docker image on the HA host (amd64 or aarch64),
+so the first install can take a few minutes. Prebuilt container publishing is not
+yet configured. To release an update, increment `version` in `config.yaml` and
+push the changes; HA can then detect an app update. Installing a repository does
+not itself install the app or enable unattended updates.
+
+The app uses HA's Supervisor token automatically; no personal HA token is needed.
+Existing standalone floor plans are not transferred automatically: the app starts
+with its own persistent `/data` directory.
+
+
 The root `config.yaml` and `Dockerfile` provide local add-on packaging. Copy this project (excluding `.env` and existing data) into `/addons/home_heat_map` on your HA installation, reload the app/add-on store, and install the local Home Heat Map entry. The container uses `/data` for persistence.
 
 When `SUPERVISOR_TOKEN` is present, the app automatically uses `http://supervisor/core` and the Supervisor token. It accepts requests only from HA's ingress proxy (`172.30.32.2`), and uses relative browser URLs so it works under an ingress path. No direct host port is exposed by the add-on manifest. See [HA ingress requirements](https://developers.home-assistant.io/docs/apps/presentation/).
