@@ -37,3 +37,7 @@ node_modules/
 .envrc
 /backups/
 /screenshots/
+
+# Public app-store artwork (home floor-plan images remain ignored)
+!/icon.png
+!/logo.png

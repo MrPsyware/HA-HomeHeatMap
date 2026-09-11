@@ -1,5 +1,7 @@
 # Home Heat Map
 
+<p align="center"><img src="assets/branding/readme-banner.png" alt="Home Heat Map — a house filled with colourful floor-plan heat contours" width="600"></p>
+
 A Go web app for mapping Home Assistant temperature, relative humidity, RSSI and Zigbee link quality onto shared floor plan images. The UI is embedded in the executable; there is no frontend build step or external CDN. It supports standalone use and includes packaging for a local Home Assistant add-on (now called an app).
 
 ## Run standalone

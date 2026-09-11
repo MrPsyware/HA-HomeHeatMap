@@ -37,3 +37,5 @@ body.minimal .workspace { border: 0; border-radius: 0; box-shadow: none; }
 body.minimal .map-viewport { padding: 0; place-items: center; background-image: none; }
 body.minimal #map { border-radius: 0; box-shadow: none; }
 body.minimal #notice { position: absolute; top: 8px; left: 8px; right: 8px; z-index: 1; margin: 0; }
+
+img.brand-icon { object-fit: contain; background: transparent; border-radius: 0; }
