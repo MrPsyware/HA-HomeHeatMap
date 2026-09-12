@@ -156,11 +156,12 @@ boundary; standalone setup remains available at the app's main URL.
 1. Copy [web/home-heat-map-card.js](web/home-heat-map-card.js) to
    `/config/www/home-heat-map-card.js` on Home Assistant.
 2. Add dashboard resource `/local/home-heat-map-card.js` with type **JavaScript module**.
-3. Add a manual card:
+3. For the installed HA app, add a manual card using its full installed slug
+   (the final segment of its `/app/<slug>` address):
 
 ```yaml
 type: custom:home-heat-map-card
-url: http://YOUR-APP-HOST:8099/
+addon: YOUR-INSTALLED-APP-SLUG
 metrics:
   - temperature
   - humidity
@@ -170,6 +171,21 @@ device_labels: false
 # floor: YOUR-FLOOR-ID
 ```
 
+The card creates and renews an ingress session through the signed-in HA frontend,
+then embeds the app's `/api/hassio_ingress/.../` URL directly. This avoids putting
+HA's app-page navigation inside the dashboard card. Existing same-origin
+`url: /app/<slug>` and `url: /hassio/ingress/<slug>` settings are also recognised.
+The app must be running and your HA user must have permission to use the
+Supervisor ingress APIs. No token belongs in the card YAML.
+
+For just a live map, use `minimal: true` with one metric and optionally `floor`.
+After replacing an older card file in `/config/www/`, change its dashboard resource
+URL to `/local/home-heat-map-card.js?v=3` and refresh the dashboard. The card file
+is installed separately from the HA app; this card update works with app 0.1.1.
+
+For a standalone deployment, use `url: http://YOUR-APP-HOST:8099/` instead of
+`addon`. This continues to load the app directly without Supervisor.
+
 Use one entry in `metrics` to lock the layer, or multiple entries to show a
 selector. Supported entries are `temperature`, `humidity`, `rssi`, and `lqi`.
 Set `history: false` (the default) to hide history. `device_labels: true`
@@ -177,9 +193,9 @@ restores the full app's marker/label behaviour. Omit `floor` to show a floor
 selector; floor names are matched case-insensitively (for example, `floor: upstairs`). Internal floor IDs are also accepted.
 The card URL must be reachable by the dashboard browser; `localhost` refers to
 that browser's machine. An HTTPS dashboard needs an HTTPS app URL, typically
-through your reverse proxy. The card does not establish a Supervisor ingress
-session or create a proxy; use a stable browser-accessible app URL. App API
-credentials stay on the app server.
+through your reverse proxy. These URL requirements apply to standalone deployment;
+`addon` uses the same origin as the HA dashboard. App API credentials stay on the
+app server.
 
 For a standard webpage/iframe card, the compact URL is:
 `http://YOUR-APP-HOST:8099/?embed=1&metrics=temperature,humidity&history=1`.
@@ -187,8 +203,11 @@ Optional parameters: `floor=ID`, `device_labels=1`.
 
 Card lifecycle follows the [Home Assistant custom-card API](https://developers.home-assistant.io/docs/frontend/custom-ui/custom-card/).
 Sensor classifications use [HA sensor device classes and units](https://developers.home-assistant.io/docs/core/entity/sensor/).
-The card and iframe are browser-tested locally; installation in a real HA
-dashboard still needs verification on your installation.
+Card lifecycle and ingress error/session handling are covered by
+`node --test tests/card.test.cjs`. The ingress browser test loads the real map UI
+with simulated HA session and proxy responses:
+`NODE_PATH=/tmp/heatmap-browser/node_modules node tests/card-browser.cjs`.
+Verification on your HA installation is still recommended.
 
 Browser regression checks (mock HA responses; no user layout writes):
 
