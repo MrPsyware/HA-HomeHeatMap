@@ -222,3 +222,20 @@ Minimal mode overrides history and device-label settings. Copy the updated card
 JavaScript to HA if you already installed an older version.
 
 Floor URL parameters and card settings accept case-insensitive floor names or exact internal IDs. For names containing spaces, URL-encode them (for example `floor=First%20Floor`). Exact IDs take precedence; duplicate names select the first matching floor.
+
+## Transfer an existing setup
+
+With app version 0.1.1 or newer, open **Setup → Import saved setup**, select your
+transfer ZIP and click **Import transfer ZIP**. This works through HA ingress and
+does not need SSH or File Editor access. The ZIP must contain `layout.json` at its
+root and the referenced `images/` files, without an outer `data/` folder. It must
+not contain `.env`, tokens, or other configuration files. Maximum ZIP and expanded
+size: 100 MB; each image: 20 MB; layout JSON: 2 MB.
+
+Import replaces the entire setup, including all floors, rooms, sensor placements,
+doorways, ignored sensors and reference markers. It preserves the previous saved
+layout as `layout-before-import-<timestamp>.json` in the app's private data folder
+and leaves the old images intact. The page reloads after a successful import.
+HA authentication stays managed by Supervisor. Save any source edits before
+creating the transfer ZIP. Private bundles should stay in the Git-ignored
+`backups/` directory.

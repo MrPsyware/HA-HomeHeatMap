@@ -115,6 +115,7 @@ func (a *application) handler() http.Handler {
 	})
 	mux.HandleFunc("PUT /api/layout", a.saveLayout)
 	mux.HandleFunc("POST /api/images", a.upload)
+	mux.HandleFunc("POST /api/import", a.importLayout)
 	mux.HandleFunc("GET /api/catalog", func(w http.ResponseWriter, r *http.Request) {
 		v, err := a.ha.Catalog(r.Context())
 		if err != nil {

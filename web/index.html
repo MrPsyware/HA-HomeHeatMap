@@ -23,7 +23,7 @@
 <div id="reference-controls" hidden><div class="aside-title">REFERENCE MARKERS</div><input id="reference-name" maxlength="100" placeholder="e.g. Hall access point"><select id="reference-kind"><option value="wifi">Wi-Fi access point</option><option value="zigbee">Zigbee coordinator / router</option></select><button id="add-reference">Place reference marker</button><div id="reference-list"></div></div>
     <div class="aside-title">ROOMS & DOORWAYS</div><div id="geometry-list"></div><button id="delete-floor" class="danger">Delete this floor</button>
    </div>
-   <div class="aside-footer"><button id="save" class="primary" hidden>Save setup</button><span id="save-state"></span></div>
+   <div class="aside-footer"><button id="save" class="primary" hidden>Save setup</button><span id="save-state"></span><div id="import-controls" hidden><label>Import saved setup<input id="import-file" type="file" accept=".zip,application/zip"></label><button id="import-setup">Import transfer ZIP</button><p class="hint">Replaces this app’s layout and floor plans. A copy of the previous layout is kept on the server. No HA credentials are imported.</p></div></div>
   </aside>
   <section class="map-section">
    <div class="map-toolbar"><select id="embed-floor" aria-label="Floor" hidden></select><div><span class="live-dot"></span><strong id="map-title">Your floor plan</strong><span id="map-mode" class="muted">Live temperatures</span></div><div class="row"><button id="zoom-out" aria-label="Zoom out">−</button><span id="zoom-label">100%</span><button id="zoom-in" aria-label="Zoom in">+</button><button id="zoom-fit">Fit</button></div></div>

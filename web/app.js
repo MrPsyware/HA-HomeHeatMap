@@ -38,6 +38,8 @@ function floorOptions(select, value = '') { const entries = [['', 'Choose later'
 function renderSidebar() {
   $('floor-list').replaceChildren(...layout.floors.map(f => { const b = button(f.name, () => selectFloor(f.id), f.id === floorID ? 'active' : ''); b.append(text('span', `${f.rooms.length} rooms`, 'muted')); return b; }));
   $('setup-panel').hidden = !setup || !floor(); $('view-panel').hidden = setup;
+  $('import-controls').hidden = !setup || demo;
+  $('import-setup').disabled = busy;
   $('save').hidden = !setup; $('save').disabled = demo || !dirty || busy;
   $('add-floor').hidden = !setup && layout.floors.length > 0;
   if (!floor()) return;
@@ -490,3 +492,17 @@ canvas.addEventListener('pointermove', e => {
   if (hovered !== next) { hovered = next; draw(); }
 });
 canvas.addEventListener('pointerleave', () => { hovered = ''; draw(); });
+
+$('import-setup').onclick = run(async () => {
+  if (embedded || demo || busy) return;
+  const file = $('import-file').files[0];
+  if (!file) { notice('Choose your transfer ZIP first.'); return; }
+  if (file.size > 100 * 1024 * 1024) { notice('Transfer ZIP must be no larger than 100 MB.'); return; }
+  if ((layout.floors.length || dirty) && !confirm('Replace this app’s setup with the ZIP contents? Unsaved edits will be discarded. The previous saved layout will be backed up on the server.')) return;
+  busy = true; renderSidebar(); document.querySelector('main').inert = true;
+  notice('Importing your floor plans and setup…');
+  try {
+    await api('api/import?' + new URLSearchParams({ revision: layout.revision }), { method: 'POST', headers: { 'Content-Type': 'application/zip' }, body: file });
+    dirty = false; location.reload();
+  } finally { busy = false; document.querySelector('main').inert = false; renderSidebar(); }
+});
