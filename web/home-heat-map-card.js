@@ -28,6 +28,7 @@ class HomeHeatMapCard extends HTMLElement {
     if (addon && (typeof addon !== 'string' || !/^[a-zA-Z0-9_-]+$/.test(addon))) throw Error('addon must be the installed HA app slug.');
     if (panel && !config.addon && url.origin !== location.origin) throw Error('Use addon with the HA instance displaying this dashboard.');
     const layers = config.metrics || ['temperature', 'humidity'];
+    if (config.theme && !['auto', 'dark', 'light'].includes(config.theme)) throw Error('theme must be auto, dark or light.');
     if (!Array.isArray(layers) || !layers.length || layers.some(m => !['temperature', 'humidity', 'rssi', 'lqi'].includes(m))) throw new Error('metrics must contain temperature, humidity, rssi or lqi.');
     this._generation = (this._generation || 0) + 1;
     this._loading = false; this._ready = false; this._error = false;
@@ -40,6 +41,7 @@ class HomeHeatMapCard extends HTMLElement {
     frame.style.height = Math.max(250, Math.min(1600, Number(config.height) || 550)) + 'px';
     frame.setAttribute('loading', 'lazy');
     this._frame = frame;
+    frame.onload = () => this._sendTheme(true);
     this._status = document.createElement('div'); this._status.setAttribute('role', 'status');
     this._status.style.cssText = 'padding:16px;';
     this._retry = document.createElement('button'); this._retry.textContent = 'Retry connection';
@@ -49,6 +51,7 @@ class HomeHeatMapCard extends HTMLElement {
     card.append(this._status, this._retry, frame); root.replaceChildren(card);
     if (addon) this._connect();
     else frame.src = this._mapURL(url).href;
+    this._watchTheme();
   }
   _mapURL(url) {
     if (!url.pathname.endsWith('/')) url.pathname += '/';
@@ -59,17 +62,50 @@ class HomeHeatMapCard extends HTMLElement {
     url.searchParams.set('device_labels', config.device_labels === true ? '1' : '0');
     url.searchParams.set('metrics', config.metrics.join(','));
     url.searchParams.set('history', config.history === true ? '1' : '0');
+    url.searchParams.set('theme', config.theme === 'light' ? 'light' : 'dark');
+    url.searchParams.set('theme_origin', location.origin);
     if (config.floor) url.searchParams.set('floor', config.floor);
     return url;
   }
   set hass(value) {
     this._hass = value;
+    this._queueTheme();
     if (!this._ready && !this._error) this._loadIngress();
   }
-  connectedCallback() { this._connect(); }
+  connectedCallback() { this._connect(); this._watchTheme(); }
   disconnectedCallback() {
     clearInterval(this._timer); this._timer = undefined;
     this._generation = (this._generation || 0) + 1; this._loading = false;
+    this._themeObserver?.disconnect();
+    if (this._themeFrame) cancelAnimationFrame(this._themeFrame);
+    this._themeFrame = undefined;
+  }
+  _watchTheme() {
+    this._themeObserver?.disconnect();
+    if (!this.isConnected || typeof MutationObserver === 'undefined') return;
+    this._themeObserver = new MutationObserver(() => this._queueTheme());
+    for (const target of [this, document.documentElement]) this._themeObserver.observe(target, { attributes: true, attributeFilter: ['style', 'class'] });
+    this._queueTheme();
+  }
+  _queueTheme() {
+    if (typeof requestAnimationFrame === 'undefined' || this._themeFrame) return;
+    this._themeFrame = requestAnimationFrame(() => { this._themeFrame = undefined; this._sendTheme(); });
+  }
+  _sendTheme(force = false) {
+    if (!this._frame?.src || !this._frame.contentWindow || typeof getComputedStyle === 'undefined') return;
+    const style = getComputedStyle(this), selection = this.config.theme || 'auto';
+    const theme = { mode: selection === 'auto' ? (this._hass?.themes?.darkMode === false ? 'light' : 'dark') : selection };
+    if (selection === 'auto') {
+      const colors = { background: '--primary-background-color', surface: '--card-background-color', text: '--primary-text-color', muted: '--secondary-text-color', border: '--divider-color', accent: '--primary-color' };
+      for (const [key, variable] of Object.entries(colors)) {
+        const value = style.getPropertyValue(variable).trim();
+        if (value && CSS.supports('color', value)) theme[key] = value;
+      }
+    }
+    const message = JSON.stringify(theme);
+    if (!force && message === this._lastTheme) return;
+    this._lastTheme = message;
+    this._frame.contentWindow.postMessage({ type: 'home-heat-map-theme', theme }, new URL(this._frame.src).origin);
   }
   _connect() {
     if (!this.isConnected || !this._addon) return;

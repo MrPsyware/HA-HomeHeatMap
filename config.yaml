@@ -1,5 +1,5 @@
 name: Home Heat Map
-version: "0.1.1"
+version: "0.1.2"
 slug: home_heat_map
 url: https://github.com/MrPsyware/HA-HomeHeatMap
 description: Floor plan heatmaps for temperature, humidity and wireless signals

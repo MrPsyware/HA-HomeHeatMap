@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.2
+
+- Follow HA theme colours in dashboard cards, with optional light/dark overrides and a dark standalone default.
+- Apply themed backgrounds to the map surround, controls and room labels.
+- Resolve dashboard cards through authenticated HA ingress without the surrounding HA interface.
+
 ## 0.1.1
 
 - Import saved layouts and floor-plan images from a transfer ZIP in Setup.

@@ -53,6 +53,34 @@ const path = require('node:path');
     const cookies = await page.context().cookies('https://ha.example' + prefix);
     assert.ok(cookies.some(c => c.name === 'ingress_session' && c.secure && c.path === '/api/hassio_ingress/'));
     assert.deepEqual(errors, []);
+    const mapFrame = page.frames().find(f => f.url().includes(prefix));
+    await mapFrame.waitForFunction(() => getComputedStyle(document.querySelector('#viewport')).backgroundColor === 'rgb(17, 19, 21)');
+    // HA custom colours cross the iframe boundary and update without navigation.
+    await page.evaluate(() => {
+      const card = document.querySelector('home-heat-map-card');
+      card.style.setProperty('--primary-background-color', '#182838');
+      card.style.setProperty('--card-background-color', '#243444');
+      card.style.setProperty('--primary-text-color', '#f0f1f2');
+      card.hass = { ...card._hass, themes: { darkMode: true } };
+    });
+    await mapFrame.waitForFunction(() => getComputedStyle(document.querySelector('#viewport')).backgroundColor === 'rgb(24, 40, 56)');
+    assert.equal(await mapFrame.evaluate(() => getComputedStyle(document.body).color), 'rgb(240, 241, 242)');
+    assert.equal(await page.locator('home-heat-map-card iframe').getAttribute('src'), src);
+    await page.evaluate(() => {
+      const card = document.querySelector('home-heat-map-card');
+      card.style.setProperty('--primary-background-color', '#fafafa');
+      card.style.setProperty('--card-background-color', '#ffffff');
+      card.style.setProperty('--primary-text-color', '#222222');
+      card.hass = { ...card._hass, themes: { darkMode: false } };
+    });
+    await mapFrame.waitForFunction(() => document.documentElement.dataset.theme === 'light' && getComputedStyle(document.querySelector('#viewport')).backgroundColor === 'rgb(250, 250, 250)');
+    // A forced dark theme ignores HA's light colours.
+    await page.evaluate(() => { const card = document.querySelector('home-heat-map-card'); card.config.theme = 'dark'; card._sendTheme(); });
+    await mapFrame.waitForFunction(() => getComputedStyle(document.querySelector('#viewport')).backgroundColor === 'rgb(17, 19, 21)');
+    await mapFrame.evaluate(() => window.dispatchEvent(new MessageEvent('message', { source: parent, origin: 'https://untrusted.example', data: { type: 'home-heat-map-theme', theme: { mode: 'light', background: 'red' } } })));
+    assert.equal(await mapFrame.evaluate(() => document.documentElement.dataset.theme), 'dark');
+    assert.deepEqual(errors, []);
     console.log('PASS: card establishes ingress cookie and directly loads the real minimal-map UI through mocked HA ingress.');
+    console.log('PASS: dark default, HA custom colours, live light/dark switching, explicit dark override and message origin checks.');
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exit(1); });

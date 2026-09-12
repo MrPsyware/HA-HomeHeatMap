@@ -1,6 +1,7 @@
 import { metrics, metricOf, humidityPairs, buildSignalField } from './metrics.js';
 import { roomLabelPoint } from './labels.js';
 import { findFloor } from './floors.js';
+import { startTheme } from './theme.js';
 import { inside, buildField, valueAt, colour } from './thermal.js';
 
 const params = new URLSearchParams(location.search), minimal = params.get('minimal') === '1', embedded = minimal || params.get('embed') === '1';
@@ -16,6 +17,7 @@ let image = null, field = null, cells = [], currentValues = {}, liveValues = {},
 let changes = 0, sourceEpoch = 0;
 let gridWidth = 1, gridHeight = 1;
 let roomLabelPoints = new Map();
+let labelTheme = { background: '#202124', text: '#e8eaed' };
 const heatCanvas = document.createElement('canvas'), heatCtx = heatCanvas.getContext('2d');
 let dirty = false, demo = false, configured = false, zoom = 1, playing = null, lastLive = 0, imageRequest = 0, busy = false;
 const canvas = $('map'), ctx = canvas.getContext('2d');
@@ -227,7 +229,7 @@ function label(value, x, y, unit, filled, estimated = false) {
   const starWidth = estimated ? ctx.measureText('*').width + unit : 0;
   ctx.font = font;
   const width = Math.max(...widths.map((width, i) => width + (i === 0 ? starWidth : 0))) + 14 * unit;
-  ctx.fillStyle = filled ? '#fffffff2' : '#ffffffb8'; ctx.beginPath(); ctx.roundRect(x - width / 2, y - height / 2, width, height, 5 * unit); ctx.fill(); ctx.fillStyle = '#334a3b';
+  ctx.fillStyle = labelTheme.background; ctx.beginPath(); ctx.roundRect(x - width / 2, y - height / 2, width, height, 5 * unit); ctx.fill(); ctx.fillStyle = labelTheme.text;
   lines.forEach((line, i) => {
     const lineY = y + (i - (lines.length - 1) / 2) * lineHeight;
     ctx.fillText(line, x - (i === 0 ? starWidth / 2 : 0), lineY);
@@ -401,6 +403,11 @@ async function initialize() {
   notice(configured ? '' : 'Ready for your floor plans. To connect Home Assistant, set HA_URL and HA_TOKEN on the server and restart. You can also try the demo.');
   await loadCatalog();
 }
+startTheme(() => {
+  const style = getComputedStyle(document.documentElement);
+  labelTheme = { background: style.getPropertyValue('--surface').trim(), text: style.getPropertyValue('--text').trim() };
+  draw();
+});
 configureMetric();
 run(initialize)();
 setInterval(async () => {

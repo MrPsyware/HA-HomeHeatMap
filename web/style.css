@@ -39,3 +39,18 @@ body.minimal #map { border-radius: 0; box-shadow: none; }
 body.minimal #notice { position: absolute; top: 8px; left: 8px; right: 8px; z-index: 1; margin: 0; }
 
 img.brand-icon { object-fit: contain; background: transparent; border-radius: 0; }
+
+/* Dark is the standalone default; the HA card can supply its own palette. */
+:root { color-scheme: dark; --page: #111315; --surface: #202124; --text: #e8eaed; --muted: #a5afb6; --line: #3b4248; --green: #75cba7; color: var(--text); background: var(--page); }
+:root[data-theme="light"] { color-scheme: light; --page: #f5f6f2; --surface: #ffffff; --text: #283d38; --muted: #65766d; --line: #dbe2db; --green: #28674f; }
+body, .map-viewport { background-color: var(--page); color: var(--text); }
+.map-viewport { background-image: none; }
+header, .workspace, aside, .aside-footer, dialog, .view-switch,
+input:not([type=range]):not([type=checkbox]), select, button { background: var(--surface); color: var(--text); }
+button:hover, .view-switch button.active, #floor-list button.active { background: color-mix(in srgb, var(--green) 15%, var(--surface)); color: var(--text); }
+button.active, .primary { background: var(--green); color: var(--page); }
+.badge { background: var(--surface); color: var(--green); }
+.eyebrow, .aside-title, label, #subtitle, .empty-icon { color: var(--muted); }
+#notice { background: var(--surface); color: var(--text); border-color: var(--line); }
+.danger { color: #e87c70; }
+.legend input[type=number] { background: transparent; }

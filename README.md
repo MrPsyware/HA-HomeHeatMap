@@ -179,9 +179,15 @@ The app must be running and your HA user must have permission to use the
 Supervisor ingress APIs. No token belongs in the card YAML.
 
 For just a live map, use `minimal: true` with one metric and optionally `floor`.
+The card defaults to `theme: auto`, following HA's background, surface, text and
+accent colours. Changes to the HA theme update the map without reloading it.
+Use `theme: dark` or `theme: light` to force a built-in palette. This requires
+app 0.1.2 or later and the updated card JavaScript. Standalone pages default to
+dark; add `theme=light` to their URL for the light palette. Uploaded floor-plan
+images keep their original colours; the surrounding background and labels are themed.
 After replacing an older card file in `/config/www/`, change its dashboard resource
-URL to `/local/home-heat-map-card.js?v=3` and refresh the dashboard. The card file
-is installed separately from the HA app; this card update works with app 0.1.1.
+URL to `/local/home-heat-map-card.js?v=4` and refresh the dashboard. The card file
+is installed separately from the HA app; ingress support also works with app 0.1.1.
 
 For a standalone deployment, use `url: http://YOUR-APP-HOST:8099/` instead of
 `addon`. This continues to load the app directly without Supervisor.
