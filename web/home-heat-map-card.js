@@ -8,7 +8,8 @@ class HomeHeatMapCard extends HTMLElement {
     if (!Array.isArray(layers) || !layers.length || layers.some(m => !['temperature', 'humidity', 'rssi', 'lqi'].includes(m))) throw new Error('metrics must contain temperature, humidity, rssi or lqi.');
     if (!url.pathname.endsWith('/')) url.pathname += '/';
     url.searchParams.set('embed', '1');
-    url.searchParams.set('minimal', config.minimal === true ? '1' : '0');
+    const enabled = value => value === true || value === 1 || value === '1' || value === 'true';
+    url.searchParams.set('minimal', enabled(config.minimal) ? '1' : '0');
     url.searchParams.set('device_labels', config.device_labels === true ? '1' : '0');
     url.searchParams.set('metrics', layers.join(','));
     url.searchParams.set('history', config.history === true ? '1' : '0');
